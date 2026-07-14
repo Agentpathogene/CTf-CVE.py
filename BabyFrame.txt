@@ -1,0 +1,33 @@
+Explication complète et décodage des octets
+Voici la suite exacte d'octets que tu dois envoyer. Elle est divisée en trois parties.
+
+\x00\x0C\x0C\x15\x00 \x10\x2A\xC0\x00\x00\x0A HEALTHCHECK
+└───────┬───────┘ └───────────┬───────────┘ └────┬──────┘
+Boîte 1                 Boîte 2            Le Message
+(La Trame TC)         (Le Space Packet)
+
+Partie 1 : La Trame TC (La boîte extérieure lue par le modem)
+
+\x00\x0C : Contient l'identifiant du satellite (SCID = 12). Le modem du satellite voit 12 et se dit : "Ok, ce message est bien pour moi !"
+
+\x0C\x15 : Fusionne le canal de communication (VCID = 3) et la longueur totale restante du message moins 1 (22 octets - 1 = 21, soit 15 en hexadécimal).
+
+\x00 : Le numéro de la trame. C'est la première, donc on met 0.
+
+Partie 2 : Le Space Packet (La boîte intérieure lue par l'ordinateur de bord)
+
+\x10\x2A : Contient l'identifiant de l'application (APID = 42). L'ordinateur du satellite voit 42 et se dit : "Ok, je dois donner ce message au logiciel de diagnostic !"
+
+\xC0\x00 : Indique que le paquet est unique et entier (pas de morceaux coupés).
+
+\x00\x0A : La longueur de la charge utile moins 1. Le mot HEALTHCHECK fait 11 lettres, donc 11 - 1 = 10, ce qui s'écrit 0A en hexadécimal. 
+
+Partie 3 : La Charge Utile
+
+HEALTHCHECK : Le mot magique en texte brut qui va réveiller l'application de diagnostic.
+
+La commande finale à tester
+Copie et colle cette ligne exacte dans ton terminal nexus :
+bash
+
+echo -ne "\x00\x0C\x0C\x15\x00\x10\x2A\xC0\x00\x00\x0AHEALTHCHECK" | nc 154.57.164.67 30231
